@@ -1,0 +1,166 @@
+[
+  {
+    "type": "ALARM",
+    "name": "Filter clogged",
+    "configurationVersion": 0,
+    "configuration": {
+      "type": "ALARM",
+      "arguments": {
+        "filterClogged": {
+          "refEntityKey": {
+            "key": "filterClogged",
+            "type": "TS_LATEST"
+          },
+          "defaultValue": ""
+        }
+      },
+      "createRules": {
+        "WARNING": {
+          "condition": {
+            "type": "SIMPLE",
+            "expression": {
+              "type": "SIMPLE",
+              "filters": [
+                {
+                  "argument": "filterClogged",
+                  "valueType": "BOOLEAN",
+                  "operation": "AND",
+                  "predicates": [
+                    {
+                      "type": "BOOLEAN",
+                      "operation": "EQUAL",
+                      "value": {
+                        "staticValue": true,
+                        "dynamicValueArgument": null
+                      }
+                    }
+                  ]
+                }
+              ],
+              "operation": "AND"
+            },
+            "schedule": null
+          },
+          "alarmDetails": null,
+          "dashboardId": null
+        }
+      },
+      "clearRule": {
+        "condition": {
+          "type": "SIMPLE",
+          "expression": {
+            "type": "SIMPLE",
+            "filters": [
+              {
+                "argument": "filterClogged",
+                "valueType": "BOOLEAN",
+                "operation": "AND",
+                "predicates": [
+                  {
+                    "type": "BOOLEAN",
+                    "operation": "EQUAL",
+                    "value": {
+                      "staticValue": false,
+                      "dynamicValueArgument": null
+                    }
+                  }
+                ]
+              }
+            ],
+            "operation": "AND"
+          },
+          "schedule": null
+        },
+        "alarmDetails": null,
+        "dashboardId": null
+      },
+      "propagate": false,
+      "propagateToOwner": false,
+      "propagateToTenant": false,
+      "propagateRelationTypes": null,
+      "output": null
+    }
+  },
+  {
+    "type": "ALARM",
+    "name": "Unit alarm",
+    "configurationVersion": 0,
+    "configuration": {
+      "type": "ALARM",
+      "arguments": {
+        "alarm": {
+          "refEntityKey": {
+            "key": "alarm",
+            "type": "TS_LATEST"
+          },
+          "defaultValue": ""
+        }
+      },
+      "createRules": {
+        "CRITICAL": {
+          "condition": {
+            "type": "SIMPLE",
+            "expression": {
+              "type": "SIMPLE",
+              "filters": [
+                {
+                  "argument": "alarm",
+                  "valueType": "BOOLEAN",
+                  "operation": "AND",
+                  "predicates": [
+                    {
+                      "type": "BOOLEAN",
+                      "operation": "EQUAL",
+                      "value": {
+                        "staticValue": true,
+                        "dynamicValueArgument": null
+                      }
+                    }
+                  ]
+                }
+              ],
+              "operation": "AND"
+            },
+            "schedule": null
+          },
+          "alarmDetails": null,
+          "dashboardId": null
+        }
+      },
+      "clearRule": {
+        "condition": {
+          "type": "SIMPLE",
+          "expression": {
+            "type": "SIMPLE",
+            "filters": [
+              {
+                "argument": "alarm",
+                "valueType": "BOOLEAN",
+                "operation": "AND",
+                "predicates": [
+                  {
+                    "type": "BOOLEAN",
+                    "operation": "EQUAL",
+                    "value": {
+                      "staticValue": false,
+                      "dynamicValueArgument": null
+                    }
+                  }
+                ]
+              }
+            ],
+            "operation": "AND"
+          },
+          "schedule": null
+        },
+        "alarmDetails": null,
+        "dashboardId": null
+      },
+      "propagate": false,
+      "propagateToOwner": false,
+      "propagateToTenant": false,
+      "propagateRelationTypes": null,
+      "output": null
+    }
+  }
+]

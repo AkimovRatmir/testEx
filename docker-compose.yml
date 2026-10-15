@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  thingsboard:
+    image: thingsboard/tb-node:${TB_VERSION}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"   # Web UI + HTTP device API
+      - "1883:1883"   # MQTT
+      - "7070:7070"   # Edge RPC
+      - "5683-5688:5683-5688/udp"  # CoAP / LwM2M
+    environment:
+      TB_SERVICE_ID: tb-ce-node
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JAVA_OPTS: ${TB_JAVA_OPTS}
+    volumes:
+      - tb-logs:/var/log/thingsboard
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  ahu-emulator:
+    build: ./emulator
+    restart: unless-stopped
+    depends_on:
+      - thingsboard
+    environment:
+      TB_HOST: thingsboard
+      TB_PORT: 1883
+      TB_TOKEN: ${TB_DEVICE_TOKEN}
+      PUBLISH_INTERVAL: ${PUBLISH_INTERVAL}
+      DAY_PERIOD_MIN: ${DAY_PERIOD_MIN}
+      FILTER_LIFE_MIN: ${FILTER_LIFE_MIN}
+      OUTDOOR_MEAN: ${OUTDOOR_MEAN}
+      OUTDOOR_AMPLITUDE: ${OUTDOOR_AMPLITUDE}
+      SETPOINT: ${SETPOINT}
+      FAULT_RATE_PER_HOUR: ${FAULT_RATE_PER_HOUR}
+
+  # One-shot setup of a fresh ThingsBoard: docker compose run --rm provision
+  provision:
+    build: ./emulator
+    profiles: ["setup"]
+    depends_on:
+      - thingsboard
+    user: root  # needs to write the device token into the bind-mounted .env
+    environment:
+      TB_URL: http://thingsboard:8080
+      TB_EXPORT_DIR: /thingsboard
+      ENV_FILE: /project.env
+    volumes:
+      - ./thingsboard:/thingsboard:ro
+      - ./.env:/project.env
+    command: ["node", "src/provision.ts"]
+
+volumes:
+  postgres-data:
+  tb-logs:
